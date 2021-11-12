@@ -155,7 +155,7 @@ Ensuite il faut mettre en place le repository yum associé à Trivy
         enabled: yes
 #+end_src
 Enfin il faut installer trivy avec yum install
-#begin_src yaml
+#+begin_src yaml
 - name: Install trivy
       yum:
         update_cache: yes
