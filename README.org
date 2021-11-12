@@ -130,6 +130,8 @@ Les differents =playbooks= nécessaires:
 * Developpement
 ** Ansible
 *** Playbooks
+**** Install Docker
+**** Install
 **** Build image
 #+begin_src yaml
 - name: build container image
