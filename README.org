@@ -88,7 +88,7 @@ On a commencé par reflechir au flow de notre pipeline, comment les outils propo
 Ansible va lancer les differentes tâches, en verifiant que les outils (Docker & Trivy) ne renvoient pas d'erreurs.
 Une fois cela effectuer, Ansible va envoyer l'image au registry pour garder un historique de versions et pouvoir deployer le site dans n'importe quel état.
 Enfin, on peut déployer le site en production grâce à Docker.
-#+begin_src plantuml :file /tmp/plantumml.png :exports results
+#+begin_src plantuml :file ./rapport/tools-uml.png :mkdirp t :exports results
 @startuml
 Ansible -> Docker : (Playbook) Build Image
 Docker -> Ansible : Image built
@@ -102,7 +102,7 @@ Docker -> Ansible : Prod running
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/plantumml.png]]
+[[file:./rapport/tools-uml.png]]
 
 ** Architecture
 On va réutiliser les =vagrantfiles= fournis dans un autre TP pour monter une machine =Host= avec un =Worker=, Ansible étant spcécialiser dans la configuration et le maintient d'un parc informatique via =SSH=.
@@ -173,6 +173,8 @@ Enfin il faut installer trivy avec yum install
       path: "{{ project_dir }}"
     source: build
 #+end_src
+**** Lancer image
+**** Scan Trivy
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
