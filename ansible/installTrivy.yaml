@@ -1,0 +1,31 @@
+- name: Install Trivy on a Centos 7 machine
+  hosts: prod
+  become: yes
+  tags:
+    - trivy
+  vars_files:
+    - files/secrets/credentials.yaml
+  pre_tasks:
+    - name: Install pre-requisite packages
+      yum:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - yum-utils
+
+  tasks:
+    - name: create trivy.repo
+      yum_repository:
+        name: "Trivy_repository"
+        description: TRIVY YUM repo
+        baseurl: "https://aquasecurity.github.io/trivy-repo/rpm/releases/$releasever/$basearch/"
+        gpgcheck: no
+        enabled: yes
+
+    - name: Install trivy
+      yum:
+        update_cache: yes
+        name: trivy
+        state: latest
+      become: yes
+
