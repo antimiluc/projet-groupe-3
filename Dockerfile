@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:alpine
 LABEL maintener="Basile Pracca"
 
-COPY . /usr/share/nginx/html
+COPY ./src /usr/share/nginx/html
