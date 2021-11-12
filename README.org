@@ -197,14 +197,6 @@ On peut utiliser le module docker_image
 #+end_src
 **** Lancer image
 **** Scan Trivy
-*** Variables d'environement
-**** ANSIBLE_HOME
-set with ansible directory of project
-or use
-#+begin_src shell :eval no
-cd ansible
-./setup.sh
-#+end_src
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
