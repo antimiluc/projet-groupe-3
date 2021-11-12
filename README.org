@@ -1,0 +1,109 @@
+#+TITLE: Projet Groupe 3 AJC
+#+AUTHOR: Basile PRACCA, Luc ANTIMI, Luc RUBIO
+
+* Projet
+* Outils proposés
+** Trivy
+[[https://github.com/aquasecurity/trivy][Github]]
+
+#+begin_quote
+Trivy (tri pronounced like trigger, vy pronounced like envy) is a simple and comprehensive scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues. Trivy detects vulnerabilities of OS packages (Alpine, RHEL, CentOS, etc.) and language-specific packages (Bundler, Composer, npm, yarn, etc.). In addition, Trivy scans Infrastructure as Code (IaC) files such as Terraform, Dockerfile and Kubernetes, to detect potential configuration issues that expose your deployments to the risk of attack. Trivy is easy to use. Just install the binary and you're ready to scan.
+#+end_quote
+
+*** Pourquoi
+Trivy va nous permettre de tester l'image Docker et les playbooks Ansible que nous allons créer pour détecter toute =vulnerabilité= présente.
+
+*** Installation (CentOS)
+Ajouter ce repository.
+#+begin_src conf :file /etc/yum.repos.d/trivy.repo
+[trivy]
+name=Trivy repository
+baseurl=https://aquasecurity.github.io/trivy-repo/rpm/releases/$releasever/$basearch/
+gpgcheck=0
+enabled=1
+#+end_src
+
+Update et install.
+#+begin_src sh
+sudo yum -y update
+sudo yum -y install trivy
+#+end_src
+*** Utilisation
+Trivy peut tout aussi bien analyser les =fichiers= de configuration =IaC=...
+#+begin_src sh :eval no
+trivy config
+#+end_src
+... que les =images= Docker
+#+begin_src sh :eval no
+trivy image website-image
+#+end_src
+
+Trivy renvoit un rapport
+** Registry
+[[https://hub.docker.com/_/registry][DockerHub]]
+
+#+begin_quote
+The Docker Registry 2.0 implementation for storing and distributing Docker images
+#+end_quote
+
+** Ansible
+** Tower
+* Organisation
+** Pipeline Flow
+On a commencé par reflechir au flow de notre pipeline, comment les outils proposés vont s'enchaîner et intéragir les uns avec les autres.
+
+Ansible va lancer les differentes tâches, en verifiant que les outils (Docker & Trivy) ne renvoient pas d'erreurs.
+Une fois cela effectuer, Ansible va envoyer l'image au registry pour garder un historique de versions et pouvoir deployer le site dans n'importe quel état.
+Enfin, on peut déployer le site en production grâce à Docker.
+#+begin_src plantuml :file /tmp/plantumml.png :exports results
+@startuml
+Ansible -> Docker : (Playbook) Build Image
+Docker -> Ansible : Image built
+Ansible -> Trivy : (Playbook) Analyse Image
+Trivy -> Ansible : Image Valide
+Ansible -> Registry : (Playbook) Store Image
+Registry -> Ansible : Image stored
+Ansible -> Docker : (Playbook) Up in prod
+Docker -> Ansible : Prod running
+@enduml
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/plantumml.png]]
+
+** Architecture
+On va réutiliser les =vagrantfiles= fournis dans un autre TP pour monter une machine =Host= avec un =Worker=, Ansible étant spcécialiser dans la configuration et le maintient d'un parc informatique via =SSH=.
+
+*** Host
+La machine =Host= va être responsable de faire tourner Ansible et Tower.
+Il faudra au préalable installer =Python>=3.8= et =Ansible=.
+
+=Tower= sera installé grâce aux modules Ansible sur le =galaxy store=.
+
+*** Worker
+La machine =Worker= sera responsable de faire tourner les differentes =tâches= et rapporter à la machine =Host=.
+
+Pour cela, il faudra installer =Docker= et =Trivy=, mais cela sera fait grâce aux =playbooks= Ansible
+
+Les differents =playbooks= nécessaires:
+- Install Docker :: Nous allons installer docker depuis pip, pour des soucis de facilité (il faudra donc installer Python)
+- Install Trivy :: C'est trivial en ajoutant un repository ([[*Installation (CentOS)][Installation]])
+- Build Image :: En utilisant le module [[https://docs.ansible.com/ansible/2.6/modules/docker_image_module.html#docker-image-module][docker_image]]
+- Test Image :: [[*Utilisation][Utilisation de Trivy]]
+- Store Image :: Envoyer l'image au registry
+- Deploy :: Run l'image sur un container exposé à l'exterieur en utilisant le module [[https://docs.ansible.com/ansible/2.6/modules/docker_container_module.html#docker-container-module][docker_container]]
+* Developpement
+** Ansible
+*** Playbooks
+**** Build image
+#+begin_src yaml
+- name: build container image
+  community.docker.docker_image:
+    name: "{{  }}/nginx:v1.0"
+    build:
+      path: "{{ project_dir }}"
+    source: build
+#+end_src
+
+* Ressources
+- [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
