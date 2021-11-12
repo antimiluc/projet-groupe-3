@@ -6,6 +6,7 @@
 ** Trivy
 [[https://github.com/aquasecurity/trivy][Github]]
 
+#+author: trivy website
 #+begin_quote
 Trivy (tri pronounced like trigger, vy pronounced like envy) is a simple and comprehensive scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues. Trivy detects vulnerabilities of OS packages (Alpine, RHEL, CentOS, etc.) and language-specific packages (Bundler, Composer, npm, yarn, etc.). In addition, Trivy scans Infrastructure as Code (IaC) files such as Terraform, Dockerfile and Kubernetes, to detect potential configuration issues that expose your deployments to the risk of attack. Trivy is easy to use. Just install the binary and you're ready to scan.
 #+end_quote
@@ -42,12 +43,44 @@ Trivy renvoit un rapport
 ** Registry
 [[https://hub.docker.com/_/registry][DockerHub]]
 
+#+author: Dockerhub
 #+begin_quote
 The Docker Registry 2.0 implementation for storing and distributing Docker images
 #+end_quote
 
+*** Utilisation
+Start registry
+#+begin_src sh
+docker run -d -p 5000:5000 --restart always --name registry registry:2
+#+end_src
+
+Use registry
+#+begin_src sh
+docker pull ubuntu
+docker tag ubuntu localhost:5000/ubuntu
+docker push localhost:5000/ubuntu
+#+end_src
 ** Ansible
+#+author: wikipedia
+#+begin_quote
+Ansible is an open-source software provisioning, configuration management, and application-deployment tool enabling infrastructure as code. It runs on many Unix-like systems, and can configure both Unix-like systems as well as Microsoft Windows. It includes its own declarative language to describe system configuration.
+#+end_quote
+
 ** Tower
+#+author: wikipedia
+#+begin_quote
+Ansible Tower is a REST API, web service, and web-based console designed to make Ansible easier to use for people with a wide range of IT skillsets. It is a hub for automation tasks.
+#+end_quote
+
+*** Installation
+#+begin_src
+
+#+end_src
+*** Alternatives
+**** Semaphore
+[[https://docs.ansible-semaphore.com/][Website]]
+Written in Go
+
 * Organisation
 ** Pipeline Flow
 On a commencé par reflechir au flow de notre pipeline, comment les outils proposés vont s'enchaîner et intéragir les uns avec les autres.
@@ -78,6 +111,8 @@ On va réutiliser les =vagrantfiles= fournis dans un autre TP pour monter une ma
 La machine =Host= va être responsable de faire tourner Ansible et Tower.
 Il faudra au préalable installer =Python>=3.8= et =Ansible=.
 
+Le provisioning du vagrant file s'en charge pour nous.
+
 =Tower= sera installé grâce aux modules Ansible sur le =galaxy store=.
 
 *** Worker
@@ -99,7 +134,7 @@ Les differents =playbooks= nécessaires:
 #+begin_src yaml
 - name: build container image
   community.docker.docker_image:
-    name: "{{  }}/nginx:v1.0"
+    name: "{{ registry_address }}/{{ image_name }}:{{ image_tag }}"
     build:
       path: "{{ project_dir }}"
     source: build
