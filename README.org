@@ -131,7 +131,36 @@ Les differents =playbooks= nécessaires:
 ** Ansible
 *** Playbooks
 **** Install Docker
-**** Install
+**** Install Trivy
+Pour installer Trivy il faut en prérequis que yum soit installé sur la machine client.
+#+begin_src yaml
+- name: Install pre-requisite packages
+      yum:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - yum-utils
+#+end_src
+Ensuite il faut mettre en place le repository yum associé à Trivy
+#+begin_src yaml
+- name: create trivy.repo
+      yum_repository:
+        name: "Trivy_repository"
+        description: TRIVY YUM repo
+        baseurl: "https://aquasecurity.github.io/trivy-repo/rpm/releases/$releasever/$basearch/"
+        gpgcheck: no
+        enabled: yes
+#+end_src
+Enfin il faut installer trivy avec yum install
+#begin_src yaml
+- name: Install trivy
+      yum:
+        update_cache: yes
+        name: trivy
+        state: latest
+      become: yes
+#+end_src
+
 **** Build image
 #+begin_src yaml
 - name: build container image
