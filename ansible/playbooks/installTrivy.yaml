@@ -4,7 +4,7 @@
   tags:
     - trivy
   vars_files:
-    - files/secrets/credentials.yaml
+    - ../files/secrets/credentials.yaml
   pre_tasks:
     - name: Install pre-requisite packages
       yum:
