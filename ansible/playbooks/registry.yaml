@@ -1,0 +1,12 @@
+---
+- name: Run Docker registry
+  hosts: prod
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Run registry
+      docker_container:
+        name: registry
+        image: registry:2
+        exposed_ports:
+          - 5000
