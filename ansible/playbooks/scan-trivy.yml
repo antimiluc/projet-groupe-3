@@ -1,0 +1,16 @@
+---
+- name: Scan image docker
+  hosts: prod
+  become: yes
+  tags:
+    - trivy
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Create webapp directory
+      file:
+        path: "/home/vagrant/.cache/trivy"
+        state: directory
+        mode: '0755'
+    - name: scan image
+      command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH pengbai/docker-supermario

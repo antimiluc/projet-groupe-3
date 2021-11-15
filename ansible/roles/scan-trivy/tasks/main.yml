@@ -1,0 +1,4 @@
+---
+- name: scan image docker
+  command: trivy image pengbai/docker-supermario
+ 

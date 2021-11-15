@@ -5,6 +5,7 @@
     ansible_python_interpreter: /usr/bin/python3
   vars_files:
     - ../files/secrets/credentials.yaml
+<<<<<<< Updated upstream:ansible/playbooks/registry.yaml
   tasks:
     - name: Run registry
       become: yes
@@ -14,3 +15,8 @@
         state: started
         restart: "yes"
         ports: "5000:5000"
+=======
+  roles:
+    - 'build-image'
+
+>>>>>>> Stashed changes:ansible/playbooks/buil-image.yml
