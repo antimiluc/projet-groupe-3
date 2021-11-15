@@ -2,19 +2,18 @@
 #+AUTHOR: Basile PRACCA, Luc ANTIMI, Luc RUBIO
 
 * Projet
-* Outils proposés
-** Trivy
+** Outils proposés
+*** Trivy
 [[https://github.com/aquasecurity/trivy][Github]]
 
-#+author: trivy website
 #+begin_quote
 Trivy (tri pronounced like trigger, vy pronounced like envy) is a simple and comprehensive scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues. Trivy detects vulnerabilities of OS packages (Alpine, RHEL, CentOS, etc.) and language-specific packages (Bundler, Composer, npm, yarn, etc.). In addition, Trivy scans Infrastructure as Code (IaC) files such as Terraform, Dockerfile and Kubernetes, to detect potential configuration issues that expose your deployments to the risk of attack. Trivy is easy to use. Just install the binary and you're ready to scan.
 #+end_quote
 
-*** Pourquoi
+**** Pourquoi ?
 Trivy va nous permettre de tester l'image Docker et les playbooks Ansible que nous allons créer pour détecter toute =vulnerabilité= présente.
 
-*** Installation (CentOS)
+**** Installation (CentOS)
 Ajouter ce repository.
 #+begin_src conf :file /etc/yum.repos.d/trivy.repo
 [trivy]
@@ -29,7 +28,7 @@ Update et install.
 sudo yum -y update
 sudo yum -y install trivy
 #+end_src
-*** Utilisation
+**** Utilisation
 Trivy peut tout aussi bien analyser les =fichiers= de configuration =IaC=...
 #+begin_src sh :eval no
 trivy config
@@ -40,44 +39,46 @@ trivy image website-image
 #+end_src
 
 Trivy renvoit un rapport
-** Registry
+*** Registry
 [[https://hub.docker.com/_/registry][DockerHub]]
 
-#+author: Dockerhub
 #+begin_quote
 The Docker Registry 2.0 implementation for storing and distributing Docker images
 #+end_quote
 
-*** Utilisation
+**** Pourquoi ?
+Le registry va nous permettre de stocker les version du site web sous forme d'images Docker, prêtes à être déployées depuis n'importe où.
+**** Utilisation
 Start registry
-#+begin_src sh
+#+begin_src sh :eval no
 docker run -d -p 5000:5000 --restart always --name registry registry:2
 #+end_src
 
 Use registry
-#+begin_src sh
+#+begin_src sh :eval no
 docker pull ubuntu
 docker tag ubuntu localhost:5000/ubuntu
 docker push localhost:5000/ubuntu
 #+end_src
-** Ansible
-#+author: wikipedia
+*** Ansible
 #+begin_quote
 Ansible is an open-source software provisioning, configuration management, and application-deployment tool enabling infrastructure as code. It runs on many Unix-like systems, and can configure both Unix-like systems as well as Microsoft Windows. It includes its own declarative language to describe system configuration.
 #+end_quote
 
-** Tower
-#+author: wikipedia
+**** Pourquoi ?
+Ansible permet de manager des machines à distance et de leur faire effectuer differentes tâches de façon déclarative, nous permettant de diminuer au plus possible les changements du aux différences d'environements.
+**** Utilisation
+*** Tower
 #+begin_quote
 Ansible Tower is a REST API, web service, and web-based console designed to make Ansible easier to use for people with a wide range of IT skillsets. It is a hub for automation tasks.
 #+end_quote
 
-*** Installation
+**** Installation
 #+begin_src
 
 #+end_src
-*** Alternatives
-**** Semaphore
+**** Alternatives
+***** Semaphore
 [[https://docs.ansible-semaphore.com/][Website]]
 Written in Go
 
@@ -88,7 +89,7 @@ On a commencé par reflechir au flow de notre pipeline, comment les outils propo
 Ansible va lancer les differentes tâches, en verifiant que les outils (Docker & Trivy) ne renvoient pas d'erreurs.
 Une fois cela effectuer, Ansible va envoyer l'image au registry pour garder un historique de versions et pouvoir deployer le site dans n'importe quel état.
 Enfin, on peut déployer le site en production grâce à Docker.
-#+begin_src plantuml :file /tmp/plantumml.png :exports results
+#+begin_src plantuml :file ./rapport/tools-uml.png :mkdirp t :exports results
 @startuml
 Ansible -> Docker : (Playbook) Build Image
 Docker -> Ansible : Image built
@@ -102,10 +103,10 @@ Docker -> Ansible : Prod running
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/plantumml.png]]
+[[file:./rapport/tools-uml.png]]
 
 ** Architecture
-On va réutiliser les =vagrantfiles= fournis dans un autre TP pour monter une machine =Host= avec un =Worker=, Ansible étant spcécialiser dans la configuration et le maintient d'un parc informatique via =SSH=.
+On va réutiliser les =vagrantfiles= fournis dans un autre TP pour monter une machine =Host= avec un =Worker=.
 
 *** Host
 La machine =Host= va être responsable de faire tourner Ansible et Tower.
@@ -131,6 +132,25 @@ Les differents =playbooks= nécessaires:
 ** Dockerfile
 On est parti de l'image Alpine de Nginx pour réduire au maximum le nombre de dépendances et de potentielles vulnerabilités.
 Il suffit ensuite de copier l'intégralité du code source du site dans le dossier exposé par Nginx.
+** Vagrant
+*** Host
+**** Variables d'environements
+Variables d'environements à set sur la machine =Host=
+***** ANSIBLE_HOME
+Le chemin absolu du dossier Ansible.
+
+Un script est fournis pour la setup.
+(Ce fichier pourrait être étendu si on a besoin d'autres variables pour les autres outils)
+#+begin_src shell :eval no
+cd ansible
+./setup.sh
+#+end_src
+**** Provisioning
+Les vagrantfiles étant déjà tout faits, il tout à fait possible de modifier les scripts de provisioning afin de cloner le projet et setup les variables d'environements automatiquement.
+Cela dit, ce n'est pas une priorité pour l'instant.
+
+*** Worker
+Le worker va être setup et provisioné par Ansible.
 ** Ansible
 *** Playbooks
 **** Install Docker
@@ -165,6 +185,8 @@ Enfin il faut installer trivy avec yum install
 #+end_src
 
 **** Build image
+On peut utiliser le module docker_image
+
 #+begin_src yaml
 - name: build container image
   community.docker.docker_image:
@@ -173,6 +195,8 @@ Enfin il faut installer trivy avec yum install
       path: "{{ project_dir }}"
     source: build
 #+end_src
+**** Lancer image
+**** Scan Trivy
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
