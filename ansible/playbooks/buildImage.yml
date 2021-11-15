@@ -34,3 +34,5 @@
           path: /root/demo-dockerfile
         source: build
         state: present
+        push: yes
+        repository: "localhost:5000:latest"
