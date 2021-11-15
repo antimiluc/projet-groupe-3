@@ -195,6 +195,18 @@ On peut utiliser le module docker_image
       path: "{{ project_dir }}"
     source: build
 #+end_src
+**** Lancer le Registry
+Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
+
+Le principal problème vient du fait que l'on a pas de certificat SSL pour pouvoir communiquer avec nos clients en HTTPS.
+Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Host= pour indiquer que notre registry n'est pas sécurisé:
+#+begin_src json
+"insecure-registries":["192.168.99.11:5000"]
+#+end_src
+
+NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
+
+A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
 **** Lancer image
 **** Scan Trivy
 
