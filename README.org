@@ -187,6 +187,9 @@ Enfin il faut installer trivy avec yum install
 **** Build image
 On peut utiliser le module docker_image
 
+On copie le dockerfile ainsi que le dossier src contenant les fichiers sources
+du site web sur la machine client.
+Cette méthode prend un peu de temps à s'executer donc ce sera un des points d\'amélirations par la suite. 
 #+begin_src yaml
 - name: build container image
   community.docker.docker_image:
