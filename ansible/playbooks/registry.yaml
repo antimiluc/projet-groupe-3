@@ -1,0 +1,16 @@
+---
+- name: Run Docker registry
+  hosts: prod
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Run registry
+      become: yes
+      docker_container:
+        name: "registry-container"
+        image: "registry"
+        state: started
+        restart: "yes"
+        ports: "5000:5000"
