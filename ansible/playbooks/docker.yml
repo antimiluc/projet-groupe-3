@@ -1,0 +1,11 @@
+---
+- name: Install docker on a Centos 7 machine
+  hosts: prod
+  become: yes
+  tags: docker
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  roles:
+    - 'docker'
+...
+
