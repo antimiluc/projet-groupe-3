@@ -6,6 +6,10 @@
     - ../files/secrets/credentials.yaml
   become: yes
   tasks:
+    - name: delete build directory if exists
+      file:
+        path: /root/demo-dockerfile
+        state: absent
     - name: create build directory
       file:
         path: /root/demo-dockerfile
