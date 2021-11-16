@@ -23,7 +23,7 @@
     - name: copy src
       copy:
         src: ../../src
-        dest: /root/demo-dockerfile/src
+        dest: /root/demo-dockerfile
         owner: root
         group: root
         mode: '0644'
