@@ -189,7 +189,7 @@ On peut utiliser le module docker_image
 
 On copie le dockerfile ainsi que le dossier src contenant les fichiers sources
 du site web sur la machine client.
-Cette méthode prend un peu de temps à s'executer donc ce sera un des points d\'amélirations par la suite. 
+Cette méthode prend un peu de temps à s'executer donc ce sera un des points d'amélirations par la suite (on pourrait utiliser =git pull=).
 #+begin_src yaml
 - name: build container image
   community.docker.docker_image:
@@ -198,6 +198,8 @@ Cette méthode prend un peu de temps à s'executer donc ce sera un des points d\
       path: "{{ project_dir }}"
     source: build
 #+end_src
+
+Il faut bien penser à =force= le build, sans quoi Ansible passe simplement l'étape si l'image existe déjà.
 **** Lancer le Registry
 Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
 

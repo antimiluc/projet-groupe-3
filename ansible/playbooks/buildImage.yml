@@ -6,6 +6,10 @@
     - ../files/secrets/credentials.yaml
   become: yes
   tasks:
+    - name: delete build directory if exists
+      file:
+        path: /root/demo-dockerfile
+        state: absent
     - name: create build directory
       file:
         path: /root/demo-dockerfile
@@ -23,7 +27,7 @@
     - name: copy src
       copy:
         src: ../../src
-        dest: /root/demo-dockerfile/src
+        dest: /root/demo-dockerfile
         owner: root
         group: root
         mode: '0644'
@@ -32,5 +36,6 @@
         name: static
         build:
           path: /root/demo-dockerfile
+        force_source: yes
         source: build
         state: present
