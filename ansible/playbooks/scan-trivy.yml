@@ -13,4 +13,4 @@
         state: directory
         mode: '0755'
     - name: scan image
-      command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH pengbai/docker-supermario
+      command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH localhost:5000/static
