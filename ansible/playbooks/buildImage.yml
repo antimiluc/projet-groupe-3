@@ -36,5 +36,6 @@
         name: static
         build:
           path: /root/demo-dockerfile
+        force_source: yes
         source: build
         state: present
