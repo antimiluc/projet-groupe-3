@@ -1,0 +1,15 @@
+---
+- name: Run production container
+  hosts: prod
+  become: yes
+  tags:
+    - prod
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Run in prod
+      docker_container:
+        name: website-production
+        image: localhost:5000/static
+        exposed_ports:
+          - "80:80"
