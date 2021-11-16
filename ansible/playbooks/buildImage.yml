@@ -40,4 +40,4 @@
         source: build
         state: present
         push: yes
-        tags: latest
+        tag: latest
