@@ -212,8 +212,12 @@ Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Ho
 NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
 
 A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
-**** Lancer image
 **** Scan Trivy
+**** Lancer image
+Le lancement de l'image est la partie la plus simple du projet, il suffit simplement de run l'image crée plus tôt.
+Étant donné que la machine =Worker= héberge le repository et est responsable du lancement de l'image, ont peut la pull depuis =localhost=.
+
+On a définit une stratégie de redémarrage dans le cas où on re-joue le playbook.
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
