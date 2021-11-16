@@ -184,6 +184,18 @@ Enfin il faut installer trivy avec yum install
       become: yes
 #+end_src
 
+**** Lancer le Registry
+Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
+
+Le principal problème vient du fait que l'on a pas de certificat SSL pour pouvoir communiquer avec nos clients en HTTPS.
+Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Host= pour indiquer que notre registry n'est pas sécurisé:
+#+begin_src json
+"insecure-registries":["192.168.99.11:5000"]
+#+end_src
+
+NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
+
+A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
 **** Build image
 On peut utiliser le module docker_image
 
@@ -200,24 +212,44 @@ Cette méthode prend un peu de temps à s'executer donc ce sera un des points d'
 #+end_src
 
 Il faut bien penser à =force= le build, sans quoi Ansible passe simplement l'étape si l'image existe déjà.
-**** Lancer le Registry
-Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
 
-Le principal problème vient du fait que l'on a pas de certificat SSL pour pouvoir communiquer avec nos clients en HTTPS.
-Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Host= pour indiquer que notre registry n'est pas sécurisé:
-#+begin_src json
-"insecure-registries":["192.168.99.11:5000"]
-#+end_src
-
-NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
-
-A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
+Nous avons décidé de push l'image automatiquement sur notre registry pour faciliter l'étape du scan trivy.
 **** Scan Trivy
+Lance un scan sur l'image créée plus tôt.
+
+Le scan est configuré pour ne détecter uniquement les vulnerabilités graves (=HIGH= & =CRITICAL=).
+S'il en relève une, il arrête le playbook.
+
+L'output de trivy étant extremement verbose, nous l'avons fait taire et remplacé la potentielle erreure invitant l'utilisateur à aller inspecter le rapport se trouvant sur la machine =Worker=.
+
+Pour des raisons de droits au niveau de docker, nous avons décidé de récupérer l'image depuis notre registry, ce qui n'a pas beaucoup de sens : pourquoi pousserions nous une image qui n'a pas été testée ?
+Cela présente évidemment une vulnerabilité, mais pour des raisons de temps et de simplicité, nous avons utilisé cette solution de secours.
+
 **** Lancer image
-Le lancement de l'image est la partie la plus simple du projet, il suffit simplement de run l'image crée plus tôt.
+Le lancement de l'image est la partie la plus simple du projet, il suffit simplement de run l'image.
 Étant donné que la machine =Worker= héberge le repository et est responsable du lancement de l'image, ont peut la pull depuis =localhost=.
 
 On a définit une stratégie de redémarrage dans le cas où on re-joue le playbook.
+* Axes d'amelioration
+** Résoudre les problèmes de droit de trivy
+Trivy ne peut pas effectuer les tests actuellement car il les effectue avec un utilisateur qui n'appartient pas au groupe =docker=.
+
+La solution devrait être assez simple à implémenter, mais nous avons trouvé un workaround qui fonctionne pour l'instant. Nous allons donc remettre ça à plus tard et prioriser d'auters taches.
+** Fetch le rapport de trivy automatiquement
+Actuellement, le rapport effectué par trivy reste sur la machine =Worker=. Il devrait être assez facile de le récupérer sur la machine =Host= pour en faciliter la lecture.
+** Dépendances entre les playbooks
+Certains playbooks sont dépendant les uns des autres (=registry=, =build-image= et =lancer-image= ont besoin de =docker= par exemple).
+Il serait donc intéressant d'ajouter des dépendances, pour éviter ces problèmes que l'on a anticipé.
+** Variabiliser le projet
+Beaucoup de playbooks utilisent les mêmes informations entrées en dur à plusieurs endroit, c'est donc obligatoirement des informations à variabiliser.
+- repository-address
+- image-name
+- credential-path
+** Nomenclature plus stricte
+**** Casse unifiée
+Nous avons utilisés différentes casses tout au long du projet, ce qui le rend un peu brouillon. Nous aurions du instaurer une nomenclature au début du projet afin d'éviter à avoir à refactorer à la fin.
+**** Unification des extensions de fichier
+Principalement =yaml= & =yml=
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
