@@ -10,5 +10,6 @@
     - name: scan image
       command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH -o result-scan localhost:5000/static
       register: command_output
+      ignore_errors: true
     - debug: msg="{{ command_output.stdout_lines }}"
 
