@@ -13,6 +13,20 @@
         owner: root
         group: root
         mode: '0755'
+    - name: copy Dockerfile
+      copy:
+        src: ../../Dockerfile
+        dest: /root/demo-dockerfile/Dockerfile
+        owner: root
+        group: root
+        mode: '0644'
+    - name: copy src
+      copy:
+        src: ../../src
+        dest: /root/demo-dockerfile/src
+        owner: root
+        group: root
+        mode: '0644'
     - name: build container image
       docker_image:
         name: localhost:5000/static
