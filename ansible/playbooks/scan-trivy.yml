@@ -1,0 +1,11 @@
+---
+- name: Scan image docker
+  hosts: prod
+  become: yes
+  tags:
+    - trivy
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: scan image
+      command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH -o result-scan localhost:5000/static
