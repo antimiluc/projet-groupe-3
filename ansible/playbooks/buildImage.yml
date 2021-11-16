@@ -15,12 +15,10 @@
         mode: '0755'
     - name: build container image
       docker_image:
-        name: static
+        name: localhost:5000/static
         build:
           path: /root/demo-dockerfile
         source: build
         state: present
         push: yes
-        tags:
-          - "latest"
-        repository: "localhost:5000"
+        tags: latest
