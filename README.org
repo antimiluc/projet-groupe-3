@@ -142,17 +142,6 @@ On est parti de l'image Alpine de Nginx pour réduire au maximum le nombre de d�
 Il suffit ensuite de copier l'intégralité du code source du site dans le dossier exposé par Nginx.
 ** Vagrant
 *** Host
-**** Variables d'environements
-Variables d'environements à set sur la machine =Host=
-***** ANSIBLE_HOME
-Le chemin absolu du dossier Ansible.
-
-Un script est fournis pour la setup.
-(Ce fichier pourrait être étendu si on a besoin d'autres variables pour les autres outils)
-#+begin_src shell :eval no
-cd ansible
-./setup.sh
-#+end_src
 **** Provisioning
 Les vagrantfiles étant déjà tout faits, il tout à fait possible de modifier les scripts de provisioning afin de cloner le projet et setup les variables d'environements automatiquement.
 Cela dit, ce n'est pas une priorité pour l'instant.
