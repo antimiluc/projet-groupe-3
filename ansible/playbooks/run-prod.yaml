@@ -14,5 +14,5 @@
         name: website-production
         image: localhost:5000/static
         restart: yes
-        exposed_ports:
-          - 80
+        published_ports:
+          - "80:80"
