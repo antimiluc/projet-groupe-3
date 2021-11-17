@@ -1,7 +1,5 @@
 - hosts: prod
   gather_facts: no
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   vars_files:
     - '{{ credentials_path }}'
   become: yes

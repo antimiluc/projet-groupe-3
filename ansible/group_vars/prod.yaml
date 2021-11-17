@@ -6,3 +6,4 @@ port: "80"
 credentials_path: "../files/secrets/credentials.yaml"
 registery_address: "localhost:5000"
 image_name: "{{ registery_address }}/static"
+ansible_python_interpreter: /usr/bin/python3

@@ -1,8 +1,6 @@
 ---
 - name: Run production container
   hosts: prod
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   become: yes
   tags:
     - prod
