@@ -1,0 +1,83 @@
+#+TITLE: Ansible
+
+* Playbooks
+** Install Docker
+Ansible utilise =docker-py= pour intéragir avec l'API docker, on commence donc par l'installer avec =pip=.
+
+Ensuite, on peut ajouter le repository docker pour CentOS, télécharger le package et lancer le daemon.
+** Install Trivy
+Pour installer Trivy il faut en prérequis que yum soit installé sur la machine client.
+#+begin_src yaml
+- name: Install pre-requisite packages
+      yum:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - yum-utils
+#+end_src
+Ensuite il faut mettre en place le repository yum associé à Trivy
+#+begin_src yaml
+- name: create trivy.repo
+      yum_repository:
+        name: "Trivy_repository"
+        description: TRIVY YUM repo
+        baseurl: "https://aquasecurity.github.io/trivy-repo/rpm/releases/$releasever/$basearch/"
+        gpgcheck: no
+        enabled: yes
+#+end_src
+Enfin il faut installer trivy avec yum install
+#+begin_src yaml
+- name: Install trivy
+      yum:
+        update_cache: yes
+        name: trivy
+        state: latest
+      become: yes
+#+end_src
+
+** Lancer le Registry
+Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
+
+Le principal problème vient du fait que l'on a pas de certificat SSL pour pouvoir communiquer avec nos clients en HTTPS.
+Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Host= pour indiquer que notre registry n'est pas sécurisé:
+#+begin_src json
+"insecure-registries":["192.168.99.11:5000"]
+#+end_src
+
+NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
+
+A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
+** Build image
+On peut utiliser le module docker_image
+
+On copie le dockerfile ainsi que le dossier src contenant les fichiers sources
+du site web sur la machine client.
+Cette méthode prend un peu de temps à s'executer donc ce sera un des points d'amélirations par la suite (on pourrait utiliser =git pull=).
+#+begin_src yaml
+- name: build container image
+  community.docker.docker_image:
+    name: "{{ registry_address }}/{{ image_name }}:{{ image_tag }}"
+    build:
+      path: "{{ project_dir }}"
+    source: build
+#+end_src
+
+Il faut bien penser à =force= le build, sans quoi Ansible passe simplement l'étape si l'image existe déjà.
+
+Nous avons décidé de push l'image automatiquement sur notre registry pour faciliter l'étape du scan trivy.
+** Scan Trivy
+Lance un scan sur l'image créée plus tôt.
+
+Le scan est configuré pour ne détecter uniquement les vulnerabilités graves (=HIGH= & =CRITICAL=).
+S'il en relève une, il arrête le playbook.
+
+L'output de trivy étant extremement verbose, nous l'avons fait taire et remplacé la potentielle erreure invitant l'utilisateur à aller inspecter le rapport se trouvant sur la machine =Worker=.
+
+Pour des raisons de droits au niveau de docker, nous avons décidé de récupérer l'image depuis notre registry, ce qui n'a pas beaucoup de sens : pourquoi pousserions nous une image qui n'a pas été testée ?
+Cela présente évidemment une vulnerabilité, mais pour des raisons de temps et de simplicité, nous avons utilisé cette solution de secours.
+
+** Lancer image
+Le lancement de l'image est la partie la plus simple du projet, il suffit simplement de run l'image.
+Étant donné que la machine =Worker= héberge le repository et est responsable du lancement de l'image, ont peut la pull depuis =localhost=.
+
+On a définit une stratégie de redémarrage dans le cas où on re-joue le playbook.

@@ -1,7 +1,15 @@
 #+TITLE: Projet Groupe 3 AJC
-#+AUTHOR: Basile PRACCA, Luc ANTIMI, Luc RUBIO
+#+AUTHOR: ANTIMI Luc, PRACCA Basile, RUBIO Luc
 
 * Projet
+** But
+Le but de ce projet est de créer une pipeline CI/CD pour un site web statique.
+
+Pour cela, on nous propose d'utiliser différents outils:
+- Trivy
+- Registry
+- Ansible
+- Tower
 ** Outils proposés
 *** Trivy
 [[https://github.com/aquasecurity/trivy][Github]]
@@ -128,96 +136,23 @@ Les differents =playbooks= nécessaires:
 - Test Image :: [[*Utilisation][Utilisation de Trivy]]
 - Store Image :: Envoyer l'image au registry
 - Deploy :: Run l'image sur un container exposé à l'exterieur en utilisant le module [[https://docs.ansible.com/ansible/2.6/modules/docker_container_module.html#docker-container-module][docker_container]]
-* Developpement
-** Dockerfile
-On est parti de l'image Alpine de Nginx pour réduire au maximum le nombre de dépendances et de potentielles vulnerabilités.
-Il suffit ensuite de copier l'intégralité du code source du site dans le dossier exposé par Nginx.
-** Vagrant
-*** Host
-**** Variables d'environements
-Variables d'environements à set sur la machine =Host=
-***** ANSIBLE_HOME
-Le chemin absolu du dossier Ansible.
+* Axes d'amelioration
+** Utiliser git pour le build de l'image
+Le module ansible que l'on utilise est =TRES= lent pour copier le dossier, =git clone= devrait être plus rapide.
+** Résoudre les problèmes de droit de trivy
+Trivy ne peut pas effectuer les tests actuellement car il les effectue avec un utilisateur qui n'appartient pas au groupe =docker=.
 
-Un script est fournis pour la setup.
-(Ce fichier pourrait être étendu si on a besoin d'autres variables pour les autres outils)
-#+begin_src shell :eval no
-cd ansible
-./setup.sh
-#+end_src
-**** Provisioning
-Les vagrantfiles étant déjà tout faits, il tout à fait possible de modifier les scripts de provisioning afin de cloner le projet et setup les variables d'environements automatiquement.
-Cela dit, ce n'est pas une priorité pour l'instant.
-
-*** Worker
-Le worker va être setup et provisioné par Ansible.
-** Ansible
-*** Playbooks
-**** Install Docker
-**** Install Trivy
-Pour installer Trivy il faut en prérequis que yum soit installé sur la machine client.
-#+begin_src yaml
-- name: Install pre-requisite packages
-      yum:
-        name: "{{item}}"
-        state: latest
-      loop:
-        - yum-utils
-#+end_src
-Ensuite il faut mettre en place le repository yum associé à Trivy
-#+begin_src yaml
-- name: create trivy.repo
-      yum_repository:
-        name: "Trivy_repository"
-        description: TRIVY YUM repo
-        baseurl: "https://aquasecurity.github.io/trivy-repo/rpm/releases/$releasever/$basearch/"
-        gpgcheck: no
-        enabled: yes
-#+end_src
-Enfin il faut installer trivy avec yum install
-#+begin_src yaml
-- name: Install trivy
-      yum:
-        update_cache: yes
-        name: trivy
-        state: latest
-      become: yes
-#+end_src
-
-**** Build image
-On peut utiliser le module docker_image
-
-On copie le dockerfile ainsi que le dossier src contenant les fichiers sources
-du site web sur la machine client.
-Cette méthode prend un peu de temps à s'executer donc ce sera un des points d'amélirations par la suite (on pourrait utiliser =git pull=).
-#+begin_src yaml
-- name: build container image
-  community.docker.docker_image:
-    name: "{{ registry_address }}/{{ image_name }}:{{ image_tag }}"
-    build:
-      path: "{{ project_dir }}"
-    source: build
-#+end_src
-
-Il faut bien penser à =force= le build, sans quoi Ansible passe simplement l'étape si l'image existe déjà.
-**** Lancer le Registry
-Run le registry en lui même est relativement simple, l'image est hostée sur DockerHub, il suffit d'ouvrir le port 5000 à l'exterieur.
-
-Le principal problème vient du fait que l'on a pas de certificat SSL pour pouvoir communiquer avec nos clients en HTTPS.
-Il faut donc modifier le fichier =/etc/docker/daemon.json= sur notre machine =Host= pour indiquer que notre registry n'est pas sécurisé:
-#+begin_src json
-"insecure-registries":["192.168.99.11:5000"]
-#+end_src
-
-NB: il est nécessaire de restart le daemon docker pour que cette modification soit prise en compte.
-
-A terme, il serait important d'ajouter un certificat SSL, surtout sur un environnement de production, ou un registry qui serait à vocation de fournir des images à nos clients.
-**** Scan Trivy
-**** Lancer image
-Le lancement de l'image est la partie la plus simple du projet, il suffit simplement de run l'image crée plus tôt.
-Étant donné que la machine =Worker= héberge le repository et est responsable du lancement de l'image, ont peut la pull depuis =localhost=.
-
-On a définit une stratégie de redémarrage dans le cas où on re-joue le playbook.
+La solution devrait être assez simple à implémenter, mais nous avons trouvé un workaround qui fonctionne pour l'instant. Nous allons donc remettre ça à plus tard et prioriser d'auters taches.
+** Fetch le rapport de trivy automatiquement
+Actuellement, le rapport effectué par trivy reste sur la machine =Worker=. Il devrait être assez facile de le récupérer sur la machine =Host= pour en faciliter la lecture.
+** Dépendances entre les playbooks
+Certains playbooks sont dépendant les uns des autres (=registry=, =build-image= et =lancer-image= ont besoin de =docker= par exemple).
+Il serait donc intéressant d'ajouter des dépendances, pour éviter ces problèmes que l'on a anticipé.
+** Nomenclature plus stricte
+**** Casse unifiée
+Nous avons utilisés différentes casses tout au long du projet, ce qui le rend un peu brouillon. Nous aurions du instaurer une nomenclature au début du projet afin d'éviter à avoir à refactorer à la fin.
+**** Unification des extensions de fichier
+Principalement =yaml= & =yml=
 
 * Ressources
 - [[https://opensolitude.com/2015/05/26/building-docker-images-with-ansible.html][Build docker images with ansible]]
