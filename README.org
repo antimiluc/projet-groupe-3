@@ -82,9 +82,9 @@ Ansible Tower is a REST API, web service, and web-based console designed to make
 #+end_quote
 
 **** Installation
-#+begin_src
+Pour l'installation de tower/awx, Dirane nous a fournis un =docker-compose= qui se charge d'installer awx, rabbitmq ...
 
-#+end_src
+La configuration de l'outil et la creation des workflows se font dans l'interface graphique.
 **** Alternatives
 ***** Semaphore
 [[https://docs.ansible-semaphore.com/][Website]]
