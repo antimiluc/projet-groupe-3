@@ -1,0 +1,11 @@
+---
+- name: Monitoring du site en prod
+  hosts: prod
+  become: yes
+  tags:
+    - monitoring
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Curl website
+      shell: curl -X GET http://"{{ inventory_hostname }}":5000/v2/_catalog | grep static
