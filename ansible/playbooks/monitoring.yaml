@@ -1,0 +1,11 @@
+---
+- name: Monitoring du site en prod
+  hosts: prod
+  become: yes
+  tags:
+    - monitoring
+  vars_files:
+    - ../files/secrets/credentials.yaml
+  tasks:
+    - name: Curl website
+      command: curl --silent -I "{{ inventory_hostname }}"
