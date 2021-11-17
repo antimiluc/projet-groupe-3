@@ -1,18 +1,16 @@
 ---
 - name: Run production container
   hosts: prod
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   become: yes
   tags:
     - prod
   vars_files:
-    - ../files/secrets/credentials.yaml
+    - '{{ credentials_path }}'
   tasks:
     - name: Run in prod
       docker_container:
         name: website-production
-        image: localhost:5000/static
+        image: '{{ image_name }}'
         restart: yes
         published_ports:
           - "80:80"

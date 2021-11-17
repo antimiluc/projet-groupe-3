@@ -3,4 +3,7 @@ ansible_user: vagrant
 ansible_ssh_pass: "{{ vault_ansible_password }}"
 ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
 port: "80"
-
+credentials_path: "../files/secrets/credentials.yaml"
+registery_address: "localhost:5000"
+image_name: "{{ registery_address }}/static"
+ansible_python_interpreter: /usr/bin/python3

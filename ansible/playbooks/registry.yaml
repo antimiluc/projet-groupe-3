@@ -1,10 +1,8 @@
 ---
 - name: Run Docker registry
   hosts: prod
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   vars_files:
-    - ../files/secrets/credentials.yaml
+    - '{{ credentials_path }}'
   tasks:
     - name: Run registry
       become: yes

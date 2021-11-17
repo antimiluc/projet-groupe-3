@@ -5,7 +5,7 @@
   tags:
     - trivy
   vars_files:
-    - ../files/secrets/credentials.yaml
+    - '{{ credentials_path }}'
   tasks:
     - name: scan image
       block:
