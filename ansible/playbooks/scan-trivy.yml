@@ -8,4 +8,13 @@
     - ../files/secrets/credentials.yaml
   tasks:
     - name: scan image
-      command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH -o result-scan localhost:5000/static
+      block:
+        - name: execute command trivy
+          command: /usr/local/bin/trivy -q image --exit-code 1 --severity CRITICAL,HIGH -o result-scan localhost:5000/static
+          register: command_output
+      rescue:
+        - name: ERROR detected
+          debug: msg="  trivy has detected errors, more infos in the file result-scan on {{ inventory_hostname }} "
+      always:
+        - debug: msg="{{ command_output.stdout_lines }}"
+
