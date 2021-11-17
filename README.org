@@ -2,6 +2,14 @@
 #+AUTHOR: Basile PRACCA, Luc ANTIMI, Luc RUBIO
 
 * Projet
+** But
+Le but de ce projet est de créer une pipeline CI/CD pour un site web statique.
+
+Pour cela, on nous propose d'utiliser différents outils:
+- Trivy
+- Registry
+- Ansible
+- Tower
 ** Outils proposés
 *** Trivy
 [[https://github.com/aquasecurity/trivy][Github]]
