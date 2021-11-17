@@ -3,7 +3,7 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
   vars_files:
-    - ../files/secrets/credentials.yaml
+    - '{{ credentials_path }}'
   become: yes
   tasks:
     - name: delete build directory if exists
@@ -33,7 +33,7 @@
         mode: '0644'
     - name: build container image
       docker_image:
-        name: localhost:5000/static
+        name: "{{ image_name }}"
         build:
           path: /root/demo-dockerfile
         force_source: yes

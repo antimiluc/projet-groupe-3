@@ -4,7 +4,7 @@
   become: yes
   tags: docker
   vars_files:
-    - ../files/secrets/credentials.yaml
+    - '{{ credentials_path }}'
   pre_tasks:
     - name: Install pre-requisite packages
       yum:
