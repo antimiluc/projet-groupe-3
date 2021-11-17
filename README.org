@@ -137,6 +137,8 @@ Les differents =playbooks= nécessaires:
 - Store Image :: Envoyer l'image au registry
 - Deploy :: Run l'image sur un container exposé à l'exterieur en utilisant le module [[https://docs.ansible.com/ansible/2.6/modules/docker_container_module.html#docker-container-module][docker_container]]
 * Axes d'amelioration
+** Utiliser git pour le build de l'image
+Le module ansible que l'on utilise est =TRES= lent pour copier le dossier, =git clone= devrait être plus rapide.
 ** Résoudre les problèmes de droit de trivy
 Trivy ne peut pas effectuer les tests actuellement car il les effectue avec un utilisateur qui n'appartient pas au groupe =docker=.
 
