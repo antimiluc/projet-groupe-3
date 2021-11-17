@@ -19,7 +19,7 @@
         mode: '0755'
     - name: copy Dockerfile
       copy:
-        src: ../../Dockerfile
+        src: ../../docker/Dockerfile
         dest: /root/demo-dockerfile/Dockerfile
         owner: root
         group: root
