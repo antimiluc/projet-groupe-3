@@ -5,7 +5,7 @@
   tags:
     - monitoring
   vars_files:
-    - "{{ credential_path }}"
+    - "{{ credentials_path }}"
   tasks:
     - name: Curl website
-      command: curl --silent -I "{{ inventory_hostname }}" | grep -q OK
+      command: curl --silent -I "{{ inventory_hostname }}"
