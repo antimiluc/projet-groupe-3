@@ -1,0 +1,10 @@
+#+TITLE: vagrant
+
+* Host
+** Provisioning
+Les vagrantfiles étant déjà tout faits, il tout à fait possible de modifier les scripts de provisioning afin de cloner le projet et setup les variables d'environements automatiquement.
+
+Cela dit, ce n'est pas une priorité pour l'instant.
+
+* Worker
+Le worker va être setup et provisioné par Ansible.
