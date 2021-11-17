@@ -1,5 +1,5 @@
 #+TITLE: Projet Groupe 3 AJC
-#+AUTHOR: Basile PRACCA, Luc ANTIMI, Luc RUBIO
+#+AUTHOR: ANTIMI Luc, PRACCA Basile, RUBIO Luc
 
 * Projet
 ** But
@@ -148,11 +148,6 @@ Actuellement, le rapport effectué par trivy reste sur la machine =Worker=. Il d
 ** Dépendances entre les playbooks
 Certains playbooks sont dépendant les uns des autres (=registry=, =build-image= et =lancer-image= ont besoin de =docker= par exemple).
 Il serait donc intéressant d'ajouter des dépendances, pour éviter ces problèmes que l'on a anticipé.
-** Variabiliser le projet
-Beaucoup de playbooks utilisent les mêmes informations entrées en dur à plusieurs endroit, c'est donc obligatoirement des informations à variabiliser.
-- repository-address
-- image-name
-- credential-path
 ** Nomenclature plus stricte
 **** Casse unifiée
 Nous avons utilisés différentes casses tout au long du projet, ce qui le rend un peu brouillon. Nous aurions du instaurer une nomenclature au début du projet afin d'éviter à avoir à refactorer à la fin.
